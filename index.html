@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA V TimeCycle Generator - Dark</title>
+    <!-- Библиотека для ZIP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            /* Тёмная тема */
+            --bg-color: #121214; /* Глубокий тёмный фон */
+            --glass-bg: rgba(30, 30, 35, 0.6); /* Тёмное полупрозрачное стекло */
+            --glass-border: rgba(255, 255, 255, 0.08); /* Едва заметная рамка */
+            --text-main: #e1e1e6; /* Светлый текст */
+            --text-muted: #a8a8b3; /* Приглушенный текст */
+
+            --accent: #cba6f7; /* Фиолетовый акцент */
+            --btn-primary: #8257e5; /* Яркая кнопка действия */
+            --btn-primary-hover: #9466ff;
+            --success: #04d361; /* Зеленый для статусов */
+            --item-bg: rgba(255, 255, 255, 0.03); /* Фон элементов списка */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Основной контейнер в стиле Dark Frosted Glass */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(120%);
+            -webkit-backdrop-filter: blur(20px) saturate(120%);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); /* Глубокая тень */
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            color: #fff;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        /* Зона загрузки */
+        .drop-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-muted);
+        }
+
+        .drop-zone:hover, .drop-zone.active {
+            border-color: var(--accent);
+            background: rgba(130, 87, 229, 0.1);
+            color: var(--text-main);
+            transform: translateY(-2px);
+        }
+
+        .drop-zone input { display: none; }
+        .upload-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; opacity: 0.5; }
+
+        /* Информация о файле */
+        .file-info {
+            background: rgba(4, 211, 97, 0.1); /* Легкий зеленый фон */
+            border: 1px solid rgba(4, 211, 97, 0.2);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--success);
+        }
+        .file-info.show { display: flex; }
+
+        /* Кнопки */
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-gen {
+            background: var(--btn-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(130, 87, 229, 0.3);
+        }
+        .btn-gen:hover:not(:disabled) {
+            background: var(--btn-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(130, 87, 229, 0.4);
+        }
+        .btn-gen:disabled {
+            background: #29292e;
+            color: #505059;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-zip {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        .btn-zip:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Результаты */
+        .results {
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .results.show { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .res-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            background: var(--success);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .file-list {
+            max-height: 350px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 5px;
+            margin-bottom: 15px;
+        }
+
+        /* Скроллбар для темной темы */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        .f-item {
+            background: var(--item-bg);
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s;
+        }
+        .f-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .f-name {
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .f-cycle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: 8px;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .btn-dl {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            width: auto;
+            margin: 0;
+            box-shadow: none;
+        }
+        .btn-dl:hover {
+            background: var(--btn-primary);
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌤️ TimeCycle Duplicator</h1>
+    <p class="subtitle">Загрузи w_extrasunny.xml — получи полный пак погоды (18 файлов)</p>
+
+    <div class="drop-zone" id="dropZone">
+        <span class="upload-icon"></span>
+        <div>Перетащи файл сюда или нажми для выбора</div>
+        <input type="file" id="fileInput" accept=".xml">
+    </div>
+
+    <div class="file-info" id="fileInfo">
+        <span> Загружен:</span>
+        <span id="fileNameDisplay"></span>
+    </div>
+
+    <button id="genBtn" class="btn-gen" disabled>⚡ Сгенерировать все файлы</button>
+
+    <div class="results" id="resultsArea">
+        <div class="res-header">
+            <h3>Результат</h3>
+            <span class="badge" id="countBadge">0 файлов</span>
+        </div>
+        <div class="file-list" id="fileList"></div>
+        <button id="zipBtn" class="btn-zip">скачать .zip архив</button>
+    </div>
+</div>
+
+<script>
+// Полный список файлов и соответствующих циклов
+const FILE_MAP = [
+    { file: "w_blizzard.xml", cycle: "BLIZZARD" },
+    { file: "w_clear.xml", cycle: "CLEAR" },
+    { file: "w_clearing.xml", cycle: "CLEARING" },
+    { file: "w_clouds.xml", cycle: "CLOUDS" },
+    { file: "w_extrasunny.xml", cycle: "EXTRASUNNY" },
+    { file: "w_foggy.xml", cycle: "FOGGY" },
+    { file: "w_halloween.xml", cycle: "HALLOWEEN" },
+    { file: "w_neutral.xml", cycle: "NEUTRAL" },
+    { file: "w_overcast.xml", cycle: "OVERCAST" },
+    { file: "w_rain.xml", cycle: "RAIN" },
+    { file: "w_rainhalloween.xml", cycle: "RAIN_HALLOWEEN" },
+    { file: "w_smog.xml", cycle: "SMOG" },
+    { file: "w_snow.xml", cycle: "SNOW" },
+    { file: "w_snowhalloween.xml", cycle: "SNOW_HALLOWEEN" },
+    { file: "w_snowlight.xml", cycle: "SNOWLIGHT" },
+    { file: "w_thunder.xml", cycle: "THUNDER" },
+    { file: "w_xmas.xml", cycle: "XMAS" }
+];
+
+let sourceContent = "";
+let generatedData = [];
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileInfo = document.getElementById('fileInfo');
+const fileNameDisplay = document.getElementById('fileNameDisplay');
+const genBtn = document.getElementById('genBtn');
+const resultsArea = document.getElementById('resultsArea');
+const fileList = document.getElementById('fileList');
+const countBadge = document.getElementById('countBadge');
+const zipBtn = document.getElementById('zipBtn');
+
+// Обработка загрузки
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('active'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('active'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('active');
+    if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) processFile(fileInput.files[0]);
+});
+
+function processFile(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        sourceContent = e.target.result;
+        const size = file.size > 1024 ? (file.size/1024).toFixed(1) + ' KB' : file.size + ' B';
+        fileNameDisplay.textContent = `${file.name} (${size})`;
+        fileInfo.classList.add('show');
+        genBtn.disabled = false;
+    };
+    reader.readAsText(file);
+}
+
+// Генерация
+genBtn.addEventListener('click', () => {
+    if (!sourceContent) return;
+    generatedData = [];
+    fileList.innerHTML = '';
+
+    FILE_MAP.forEach((item, index) => {
+        // Умная замена имени цикла
+        let newContent = sourceContent.replace(/(name\s*=\s*")[^"]+(")/i, `$1${item.cycle}$2`);
+        generatedData.push({ name: item.file, content: newContent, cycle: item.cycle });
+
+        const div = document.createElement('div');
+        div.className = 'f-item';
+        div.innerHTML = `
+            <div style="display:flex; align-items:center;">
+                <span class="f-name">${item.file}</span>
+                <span class="f-cycle">→ ${item.cycle}</span>
+            </div>
+            <button class="btn-dl" onclick="downloadSingle(${index})">Скачать</button>
+        `;
+        fileList.appendChild(div);
+    });
+
+    countBadge.textContent = `${generatedData.length} файлов`;
+    resultsArea.classList.add('show');
+    zipBtn.style.display = 'flex';
+    resultsArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// Скачивание одного файла
+window.downloadSingle = (index) => {
+    const data = generatedData[index];
+    const blob = new Blob([data.content], { type: 'application/xml' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = data.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+};
+
+// Скачивание ZIP
+zipBtn.addEventListener('click', async () => {
+    const originalText = zipBtn.innerHTML;
+    zipBtn.innerHTML = '⏳ Создаю архив...';
+    zipBtn.disabled = true;
+
+    try {
+        const zip = new JSZip();
+        generatedData.forEach(f => zip.file(f.name, f.content));
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'timecycle_weather_pack.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    } catch (err) {
+        alert('Ошибка: ' + err.message);
+    } finally {
+        zipBtn.innerHTML = originalText;
+        zipBtn.disabled = false;
+    }
+});
+</script>
+
+</body>
+</html>
