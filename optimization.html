@@ -13,8 +13,12 @@
             --text-muted: #a8a8b3;
             --btn-neutral: rgba(255, 255, 255, 0.08);
             --btn-neutral-hover: rgba(255, 255, 255, 0.15);
+            --code-bg: rgba(0, 0, 0, 0.3);
+            --success: #04d361;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
@@ -26,41 +30,243 @@
             align-items: center;
             padding: 20px;
         }
+
         .container {
             width: 100%;
-            max-width: 600px;
-            height: 80vh;
+            max-width: 700px;
+            height: 90vh;
             background: var(--glass-bg);
             backdrop-filter: blur(20px) saturate(120%);
             -webkit-backdrop-filter: blur(20px) saturate(120%);
             border: 1px solid var(--glass-border);
             border-radius: 30px;
-            padding: 40px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
         }
-        h1 { font-size: 1.8rem; margin-bottom: 10px; }
-        p { color: var(--text-muted); margin-bottom: 30px; }
+
+        /* Header & Nav */
+        .header {
+            padding: 30px 30px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        h1 { font-size: 1.6rem; font-weight: 700; }
+        
         .back-btn {
             text-decoration: none;
-            color: var(--text-main);
-            background: var(--btn-neutral);
-            padding: 12px 24px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: 8px 16px;
             border-radius: 12px;
-            font-weight: 600;
             transition: 0.2s;
         }
-        .back-btn:hover { background: var(--btn-neutral-hover); }
+        .back-btn:hover { background: var(--btn-neutral); color: var(--text-main); }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            padding: 20px 30px 0;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: 0.2s;
+        }
+        .tab.active {
+            color: var(--text-main);
+            border-bottom-color: var(--text-main);
+        }
+        .tab:hover:not(.active) { color: var(--text-main); }
+
+        /* Content Area */
+        .content-area {
+            flex-grow: 1;
+            padding: 20px 30px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        /* Command List Items */
+        .cmd-item {
+            background: var(--btn-neutral);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: 0.2s;
+        }
+        .cmd-item:hover { background: var(--btn-neutral-hover); }
+
+        .cmd-title { font-weight: 600; font-size: 1rem; margin-bottom: 5px; }
+        .cmd-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4; }
+
+        .cmd-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .code-block {
+            flex-grow: 1;
+            background: var(--code-bg);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: #a8a8b3;
+            word-break: break-all;
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .copy-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 0 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .copy-btn:hover { background: var(--btn-neutral-hover); }
+        .copy-btn.copied {
+            background: rgba(4, 211, 97, 0.2);
+            color: var(--success);
+            border-color: rgba(4, 211, 97, 0.3);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        /* Placeholder for other tabs */
+        .placeholder {
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 50px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+
+<div class="container">
+    <div class="header">
         <h1>PC Optimization</h1>
-        <p>Раздел находится в разработке</p>
-        <a href="main_page.html" class="back-btn">Вернуться на главную</a>
+        <a href="main_page.html" class="back-btn">← Назад</a>
     </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('space')">Оптимизация пространства</button>
+        <button class="tab" onclick="switchTab('perf')">Производительность (Скоро)</button>
+    </div>
+
+    <div class="content-area" id="contentSpace">
+        
+        <!-- Item 1 -->
+        <div class="cmd-item">
+            <div class="cmd-title">Очистка системного кэша и временных файлов</div>
+            <div class="cmd-desc">Удаляет содержимое папок Temp пользователя и системы, а также кэш браузера Edge/Chrome, если он там хранится.</div>
+            <div class="cmd-row">
+                <div class="code-block">del /q/f/s %TEMP%\* & del /q/f/s C:\Windows\Temp\*</div>
+                <button class="copy-btn" onclick="copyText(this)">Копировать</button>
+            </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="cmd-item">
+            <div class="cmd-title">Очистка кэша обновлений Windows</div>
+            <div class="cmd-desc">Сбрасывает папку SoftwareDistribution. Полезно, если обновления зависли или занимают много места. Требует остановки службы.</div>
+            <div class="cmd-row">
+                <div class="code-block">net stop wuauserv && rd /s /q C:\Windows\SoftwareDistribution && net start wuauserv</div>
+                <button class="copy-btn" onclick="copyText(this)">Копировать</button>
+            </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="cmd-item">
+            <div class="cmd-title">Глубокая очистка диска (Storage Sense)</div>
+            <div class="cmd-desc">Запускает встроенный инструмент очистки, удаляя старые обновления, корзину и временные файлы установки.</div>
+            <div class="cmd-row">
+                <div class="code-block">cleanmgr /sageset:65535 & cleanmgr /sagerun:65535</div>
+                <button class="copy-btn" onclick="copyText(this)">Копировать</button>
+            </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="cmd-item">
+            <div class="cmd-title">Очистка DNS кэша и сброс сети</div>
+            <div class="cmd-desc">Очищает локальный кэш DNS-запросов и сбрасывает настройки сокетов. Помогает при проблемах с подключением.</div>
+            <div class="cmd-row">
+                <div class="code-block">ipconfig /flushdns && netsh winsock reset</div>
+                <button class="copy-btn" onclick="copyText(this)">Копировать</button>
+            </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="cmd-item">
+            <div class="cmd-title">Поиск и удаление битых ссылок на диске</div>
+            <div class="cmd-desc">Проверяет файловую систему на наличие ошибок и поврежденных секторов (требует перезагрузки).</div>
+            <div class="cmd-row">
+                <div class="code-block">chkdsk C: /f /r /x</div>
+                <button class="copy-btn" onclick="copyText(this)">Копировать</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="content-area" id="contentPerf" style="display: none;">
+        <div class="placeholder">
+            Раздел производительности находится в разработке.<br>
+            Здесь появятся твики реестра и настройки служб.
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Update buttons
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Update content
+        document.getElementById('contentSpace').style.display = tabName === 'space' ? 'block' : 'none';
+        document.getElementById('contentPerf').style.display = tabName === 'perf' ? 'block' : 'none';
+    }
+
+    async function copyText(btn) {
+        const code = btn.previousElementSibling.innerText;
+        try {
+            await navigator.clipboard.writeText(code);
+            const originalText = btn.innerText;
+            btn.innerText = 'Скопировано!';
+            btn.classList.add('copied');
+            
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('copied');
+            }, 2000);
+        } catch (err) {
+            console.error('Ошибка копирования:', err);
+            alert('Не удалось скопировать текст');
+        }
+    }
+</script>
+
 </body>
 </html>
