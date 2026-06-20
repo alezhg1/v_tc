@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTA V TimeCycle Generator - Dark</title>
+    <title>TimeCycle Duplicator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
@@ -12,11 +12,10 @@
             --glass-border: rgba(255, 255, 255, 0.08);
             --text-main: #e1e1e6;
             --text-muted: #a8a8b3;
-            --accent: #cba6f7;
-            --btn-primary: #8257e5;
-            --btn-primary-hover: #9466ff;
             --success: #04d361;
             --item-bg: rgba(255, 255, 255, 0.03);
+            --btn-neutral: rgba(255, 255, 255, 0.08);
+            --btn-neutral-hover: rgba(255, 255, 255, 0.15);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -44,33 +43,31 @@
             border: 1px solid var(--glass-border);
             border-radius: 30px;
             padding: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
         }
 
-        h1 {
-            text-align: center;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-            letter-spacing: -0.5px;
-            color: #fff;
-            flex-shrink: 0;
-        }
-
-        p.subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            flex-shrink: 0;
-        }
-
-        .upload-block {
-            flex-shrink: 0;
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 15px;
+            flex-shrink: 0;
         }
+
+        h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
+        
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        .back-link:hover { background: var(--btn-neutral); color: var(--text-main); }
+
+        .upload-block { flex-shrink: 0; margin-bottom: 15px; }
 
         .drop-zone {
             border: 2px dashed rgba(255, 255, 255, 0.1);
@@ -83,13 +80,11 @@
             color: var(--text-muted);
             font-size: 0.9rem;
         }
-
         .drop-zone:hover, .drop-zone.active {
-            border-color: var(--accent);
-            background: rgba(130, 87, 229, 0.1);
+            border-color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
             color: var(--text-main);
         }
-
         .drop-zone input { display: none; }
 
         .file-info {
@@ -107,10 +102,7 @@
         }
         .file-info.show { display: flex; }
 
-        .action-block {
-            flex-shrink: 0;
-            margin-bottom: 15px;
-        }
+        .action-block { flex-shrink: 0; margin-bottom: 15px; }
 
         button {
             width: 100%;
@@ -128,24 +120,20 @@
         }
 
         .btn-gen {
-        background: var(--btn-neutral);
-        color: var(--text-main);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--btn-neutral);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .btn-gen:hover:not(:disabled) {
             background: var(--btn-neutral-hover);
             transform: translateY(-2px);
         }
-        .btn-gen:hover:not(:disabled) {
-            background: var(--btn-primary-hover);
-            transform: translateY(-2px);
-        }
         .btn-gen:disabled {
-            background: #29292e;
+            background: rgba(255, 255, 255, 0.03);
             color: #505059;
+            border-color: transparent;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
         }
 
         .results-block {
@@ -195,24 +183,9 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: background 0.2s;
         }
-        .f-item:hover { background: rgba(255, 255, 255, 0.07); }
-
-        .f-name {
-            font-family: 'Consolas', monospace;
-            font-size: 0.85rem;
-            color: var(--text-main);
-        }
-
-        .f-cycle {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-left: 8px;
-            background: rgba(0,0,0,0.3);
-            padding: 2px 5px;
-            border-radius: 4px;
-        }
+        .f-name { font-family: 'Consolas', monospace; font-size: 0.85rem; }
+        .f-cycle { font-size: 0.7rem; color: var(--text-muted); margin-left: 8px; background: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 4px; }
 
         .btn-dl {
             background: rgba(255, 255, 255, 0.1);
@@ -223,33 +196,29 @@
             font-size: 0.75rem;
             width: auto;
             margin: 0;
-            box-shadow: none;
         }
-        .btn-dl:hover { background: var(--btn-primary); color: white; }
+        .btn-dl:hover { background: var(--btn-neutral-hover); }
 
-        .zip-block {
-            flex-shrink: 0;
-        }
-
+        .zip-block { flex-shrink: 0; }
         .btn-zip {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--btn-neutral);
             color: var(--text-main);
             border: 1px solid rgba(255, 255, 255, 0.1);
             display: none;
         }
-        .btn-zip:hover { background: rgba(255, 255, 255, 0.1); }
-
+        .btn-zip:hover { background: var(--btn-neutral-hover); }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <h1>🌤️ TimeCycle Duplicator</h1>
-    <p class="subtitle">полный пак погоды из одного .xml</p>
+    <div class="header-row">
+        <h1>️ TimeCycle Duplicator</h1>
+        <a href="main_page.html" class="back-link">← Назад</a>
+    </div>
 
     <div class="upload-block">
         <div class="drop-zone" id="dropZone">
-            Перетащите файл или нажмите для выбора
+            Перетащи файл сюда или нажми для выбора
             <input type="file" id="fileInput" accept=".xml">
         </div>
         <div class="file-info" id="fileInfo">
@@ -270,28 +239,20 @@
     </div>
 
     <div class="zip-block">
-        <button id="zipBtn" class="btn-zip">скачать .zip архив</button>
+        <button id="zipBtn" class="btn-zip">Скачать всё архивом (ZIP)</button>
     </div>
 </div>
 
 <script>
 const FILE_MAP = [
-    { file: "w_blizzard.xml", cycle: "BLIZZARD" },
-    { file: "w_clear.xml", cycle: "CLEAR" },
-    { file: "w_clearing.xml", cycle: "CLEARING" },
-    { file: "w_clouds.xml", cycle: "CLOUDS" },
-    { file: "w_extrasunny.xml", cycle: "EXTRASUNNY" },
-    { file: "w_foggy.xml", cycle: "FOGGY" },
-    { file: "w_halloween.xml", cycle: "HALLOWEEN" },
-    { file: "w_neutral.xml", cycle: "NEUTRAL" },
-    { file: "w_overcast.xml", cycle: "OVERCAST" },
-    { file: "w_rain.xml", cycle: "RAIN" },
-    { file: "w_rainhalloween.xml", cycle: "RAIN_HALLOWEEN" },
-    { file: "w_smog.xml", cycle: "SMOG" },
-    { file: "w_snow.xml", cycle: "SNOW" },
-    { file: "w_snowhalloween.xml", cycle: "SNOW_HALLOWEEN" },
-    { file: "w_snowlight.xml", cycle: "SNOWLIGHT" },
-    { file: "w_thunder.xml", cycle: "THUNDER" },
+    { file: "w_blizzard.xml", cycle: "BLIZZARD" }, { file: "w_clear.xml", cycle: "CLEAR" },
+    { file: "w_clearing.xml", cycle: "CLEARING" }, { file: "w_clouds.xml", cycle: "CLOUDS" },
+    { file: "w_extrasunny.xml", cycle: "EXTRASUNNY" }, { file: "w_foggy.xml", cycle: "FOGGY" },
+    { file: "w_halloween.xml", cycle: "HALLOWEEN" }, { file: "w_neutral.xml", cycle: "NEUTRAL" },
+    { file: "w_overcast.xml", cycle: "OVERCAST" }, { file: "w_rain.xml", cycle: "RAIN" },
+    { file: "w_rainhalloween.xml", cycle: "RAIN_HALLOWEEN" }, { file: "w_smog.xml", cycle: "SMOG" },
+    { file: "w_snow.xml", cycle: "SNOW" }, { file: "w_snowhalloween.xml", cycle: "SNOW_HALLOWEEN" },
+    { file: "w_snowlight.xml", cycle: "SNOWLIGHT" }, { file: "w_thunder.xml", cycle: "THUNDER" },
     { file: "w_xmas.xml", cycle: "XMAS" }
 ];
 
@@ -303,7 +264,6 @@ const fileInput = document.getElementById('fileInput');
 const fileInfo = document.getElementById('fileInfo');
 const fileNameDisplay = document.getElementById('fileNameDisplay');
 const genBtn = document.getElementById('genBtn');
-const resultsArea = document.querySelector('.results-block');
 const fileList = document.getElementById('fileList');
 const countBadge = document.getElementById('countBadge');
 const zipBtn = document.getElementById('zipBtn');
@@ -312,13 +272,10 @@ dropZone.addEventListener('click', () => fileInput.click());
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('active'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('active'));
 dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('active');
+    e.preventDefault(); dropZone.classList.remove('active');
     if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
 });
-fileInput.addEventListener('change', () => {
-    if (fileInput.files.length) processFile(fileInput.files[0]);
-});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) processFile(fileInput.files[0]); });
 
 function processFile(file) {
     const reader = new FileReader();
@@ -336,23 +293,14 @@ genBtn.addEventListener('click', () => {
     if (!sourceContent) return;
     generatedData = [];
     fileList.innerHTML = '';
-
     FILE_MAP.forEach((item, index) => {
         let newContent = sourceContent.replace(/(name\s*=\s*")[^"]+(")/i, `$1${item.cycle}$2`);
         generatedData.push({ name: item.file, content: newContent, cycle: item.cycle });
-
         const div = document.createElement('div');
         div.className = 'f-item';
-        div.innerHTML = `
-            <div style="display:flex; align-items:center;">
-                <span class="f-name">${item.file}</span>
-                <span class="f-cycle">→ ${item.cycle}</span>
-            </div>
-            <button class="btn-dl" onclick="downloadSingle(${index})">Скачать</button>
-        `;
+        div.innerHTML = `<div style="display:flex; align-items:center;"><span class="f-name">${item.file}</span><span class="f-cycle">→ ${item.cycle}</span></div><button class="btn-dl" onclick="downloadSingle(${index})">Скачать</button>`;
         fileList.appendChild(div);
     });
-
     countBadge.textContent = `${generatedData.length} файлов`;
     zipBtn.style.display = 'flex';
 });
@@ -363,17 +311,13 @@ window.downloadSingle = (index) => {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = data.name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
 };
 
 zipBtn.addEventListener('click', async () => {
     const originalText = zipBtn.innerHTML;
-    zipBtn.innerHTML = 'Создаю архив...';
-    zipBtn.disabled = true;
-
+    zipBtn.innerHTML = 'Создаю архив...'; zipBtn.disabled = true;
     try {
         const zip = new JSZip();
         generatedData.forEach(f => zip.file(f.name, f.content));
@@ -381,18 +325,11 @@ zipBtn.addEventListener('click', async () => {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = 'timecycle_weather_pack.zip';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
         URL.revokeObjectURL(a.href);
-    } catch (err) {
-        alert('Ошибка: ' + err.message);
-    } finally {
-        zipBtn.innerHTML = originalText;
-        zipBtn.disabled = false;
-    }
+    } catch (err) { alert('Ошибка: ' + err.message); } 
+    finally { zipBtn.innerHTML = originalText; zipBtn.disabled = false; }
 });
 </script>
-
 </body>
 </html>
