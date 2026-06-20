@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Optimization</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --glass-bg: rgba(30, 30, 35, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #e1e1e6;
+            --text-muted: #a8a8b3;
+            --btn-neutral: rgba(255, 255, 255, 0.08);
+            --btn-neutral-hover: rgba(255, 255, 255, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            height: 80vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(120%);
+            -webkit-backdrop-filter: blur(20px) saturate(120%);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        h1 { font-size: 1.8rem; margin-bottom: 10px; }
+        p { color: var(--text-muted); margin-bottom: 30px; }
+        .back-btn {
+            text-decoration: none;
+            color: var(--text-main);
+            background: var(--btn-neutral);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .back-btn:hover { background: var(--btn-neutral-hover); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PC Optimization</h1>
+        <p>Раздел находится в разработке</p>
+        <a href="main_page.html" class="back-btn">Вернуться на главную</a>
+    </div>
+</body>
+</html>
